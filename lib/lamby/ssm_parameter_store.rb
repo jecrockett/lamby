@@ -32,9 +32,9 @@ module Lamby
       @options = options
     end
 
-    def to_env
+    def to_env(overwrite: true)
       params.each do |param|
-        ENV[param.env] = param.value
+        overwrite ? ENV[param.env] = param.value : ENV[param.env] ||= param.value
       end
     end
 
@@ -143,10 +143,12 @@ module Lamby
     end
 
     def parse_history(name)
-      @hist_response.parameters.each do |p|
-        next unless p.labels.include? label
-        param = params.detect { |param| param.name == name }
-        param.value = p.value
+      stored_param = params.detect { |param| param.name == name }
+      labeled_history_param = @hist_response.parameters.detect { |p| p.labels.include? label }
+      if labeled_history_param
+        stored_param.value = labeled_history_param.value
+      else
+        params.delete(stored_param)
       end
     end
 
