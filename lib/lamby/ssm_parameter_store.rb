@@ -143,12 +143,10 @@ module Lamby
     end
 
     def parse_history(name)
-      stored_param = params.detect { |param| param.name == name }
-      labeled_history_param = @hist_response.parameters.detect { |p| p.labels.include? label }
-      if labeled_history_param
-        stored_param.value = labeled_history_param.value
-      else
-        params.delete(stored_param)
+      @hist_response.parameters.each do |p|
+        next unless p.labels.include? label
+        param = params.detect { |param| param.name == name }
+        param.value = p.value
       end
     end
 
